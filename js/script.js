@@ -6,6 +6,13 @@ Quando l'utente clicca su ogni cella, la cella cliccata si colora di azzurro ed 
 */
 
 const btnPlay = document.getElementById("btn-play");
+const resultText = document.getElementById("result-text");
+
+
+let arrayNumbers = [];
+let arrayBombs = [];
+let squareClicked = [];
+let gameEnded = false;
 
 // Al click dell bottone generiamo la griglia
 btnPlay.addEventListener("click", generateGrid);
@@ -28,6 +35,36 @@ function generateNumbersArray(arrayLength){
     return arrayGenerate;
 }
 
+/**
+ * Description: Funzione che ci genera un array di lunghezza pari a arrayLength con valori random che vanno da 1 a maxNumberGenerate senza doppioni
+ * @param {number} arrayLength - lunghezza dell array che vogliamo creare
+ * @param {number} maxNumberGenerate - il numero massimo random che possiamo generare da inserire all'interno dell array
+ * @returns {Array} Ritorna un array con numeri random non ripetuti
+ */
+function generateRandomNumbersArray(arrayLength, maxNumberGenerate){
+    let arrayGenerate = [];
+
+    while( arrayGenerate.length < arrayLength){
+        const randomNumber = getRndInteger(1, maxNumberGenerate);
+        
+        if(!arrayGenerate.includes(randomNumber)){
+            arrayGenerate.push(randomNumber);
+        }
+    }
+
+    return arrayGenerate;
+}
+
+/**
+ * Description: Funzione che genera un numero random compreso tra min e max
+ * @param {number} min - valore minimo che possiamo generare
+ * @param {number} max - valore massimo che possiamo generare
+ * @returns {number} Ritorna il numero random generato
+ */
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 
 
 // UI FUNCTION
@@ -43,6 +80,50 @@ function generateSquare(){
 }
 
 
+function squareHandlerClick(){
+
+    // Prendo tutti i quadrati
+    const squareList = document.getElementsByClassName("square");
+
+    // Se il quadrato non è stato già cliccato
+    if(!(this.classList.value).includes("active") && !gameEnded && squareClicked.length < (arrayNumbers.length - arrayBombs.length) - 1){
+
+
+        if(!arrayBombs.includes(parseInt(this.textContent))){
+            this.classList.add("active");
+            squareClicked.push(this.textContent);
+        } else {
+
+            // Scopriamo tutte le bombe
+            for(let i = 0; i < arrayNumbers.length; i++){
+                if(arrayBombs.includes(parseInt(squareList[i].textContent))){
+                    squareList[i].classList.add("bomb");
+                }
+            }
+
+            //Diciamo che il gioco è finito
+            gameEnded = true;
+
+            // Mostriamo il messaggio del risultato
+            resultText.textContent = `Hai perso con ${squareClicked.length} mosse!`;
+            resultText.classList.remove("hidden");
+        }               //33                       //49                //16
+    } else {
+        gameEnded = true;
+
+        // Scopriamo tutte le bombe
+        for(let i = 0; i < arrayNumbers.length; i++){
+            if(arrayBombs.includes(parseInt(squareList[i].textContent))){
+                squareList[i].classList.add("bomb");
+            }
+        }
+
+        // Mostriamo il messaggio del risultato
+        resultText.textContent = `Complimenti Hai Vinto!!!!`;
+        resultText.classList.remove("hidden");
+    }
+}
+
 /**
  * Description: Funzione che genera la griglia di quadrati
  */
@@ -52,13 +133,21 @@ function generateGrid(){
     const userDifficulty = document.getElementById("difficulty");
 
     //svuoto la griglia
+    resultText.textContent = "";
+    resultText.classList.add("hidden");
     gridSquare.innerHTML = "";
+    gameEnded = false;
+    squareClicked = [];
     
     // Difficoltà dell'utente
     const userDifficultyChoice = parseInt(userDifficulty.value);
 
     // Genero un array di numeri
-    let arrayNumbers = generateNumbersArray(userDifficultyChoice);
+    arrayNumbers = generateNumbersArray(userDifficultyChoice);
+
+    //Generare array di bombe
+    arrayBombs = generateRandomNumbersArray(16,userDifficultyChoice);
+    console.log(arrayBombs);
 
     // Generiamo la griglia
     for(let i = 0; i < arrayNumbers.length ; i++){
@@ -74,10 +163,8 @@ function generateGrid(){
 
         item.innerHTML = arrayNumbers[i];
         
-        item.addEventListener("click", function(){
-            item.classList.add("active");
-            console.log(item.textContent);
-        })
+
+        item.addEventListener("click", squareHandlerClick);
 
         gridSquare.append(item);
 
@@ -88,3 +175,4 @@ function generateGrid(){
         gridSquare.classList.remove("hidden");
     }
 }
+
