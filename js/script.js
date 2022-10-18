@@ -86,12 +86,27 @@ function squareHandlerClick(){
     const squareList = document.getElementsByClassName("square");
 
     // Se il quadrato non è stato già cliccato
-    if(!(this.classList.value).includes("active") && !gameEnded && squareClicked.length < (arrayNumbers.length - arrayBombs.length) - 1){
+    if(!(this.classList.value).includes("active") && !gameEnded){
 
 
         if(!arrayBombs.includes(parseInt(this.textContent))){
             this.classList.add("active");
             squareClicked.push(this.textContent);
+
+            if(squareClicked.length === (arrayNumbers.length - arrayBombs.length)){
+                gameEnded = true;
+
+                // Scopriamo tutte le bombe
+                for(let i = 0; i < arrayNumbers.length; i++){
+                    if(arrayBombs.includes(parseInt(squareList[i].textContent))){
+                        squareList[i].classList.add("bomb");
+                    }
+                }
+        
+                // Mostriamo il messaggio del risultato
+                resultText.textContent = `Complimenti Hai Vinto!!!!`;
+                resultText.classList.remove("hidden");
+            }
         } else {
 
             // Scopriamo tutte le bombe
@@ -108,19 +123,6 @@ function squareHandlerClick(){
             resultText.textContent = `Hai perso con ${squareClicked.length} mosse!`;
             resultText.classList.remove("hidden");
         }               //33                       //49                //16
-    } else {
-        gameEnded = true;
-
-        // Scopriamo tutte le bombe
-        for(let i = 0; i < arrayNumbers.length; i++){
-            if(arrayBombs.includes(parseInt(squareList[i].textContent))){
-                squareList[i].classList.add("bomb");
-            }
-        }
-
-        // Mostriamo il messaggio del risultato
-        resultText.textContent = `Complimenti Hai Vinto!!!!`;
-        resultText.classList.remove("hidden");
     }
 }
 
